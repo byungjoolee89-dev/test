@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>eG Enterprise BTM Dashboard - 트래픽 과부하 시나리오</title>
+    <title>eG Enterprise BTM Dashboard</title>
 
     <!-- Three.js -->
     <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
@@ -455,8 +455,8 @@
 <body>
     <div class="dashboard">
         <header class="dashboard-header">
-            <h1>🚨 eG Enterprise BTM Dashboard - 트래픽 과부하 시나리오</h1>
-            <p class="subtitle">High Traffic Overload Simulation | TPS: 50~100+ | Error Rate: ~25%</p>
+            <h1>eG Enterprise BTM Dashboard</h1>
+            <p class="subtitle">Tomcat Business Transaction Monitoring</p>
         </header>
 
         <!-- Statistics Widgets -->
@@ -468,25 +468,25 @@
             </div>
 
             <div class="stat-card">
-                <div class="stat-label">평균 응답시간</div>
+                <div class="stat-label">Avg Response Time</div>
                 <div class="stat-value" id="stat-avg-response">0</div>
                 <div class="stat-description">milliseconds</div>
             </div>
 
             <div class="stat-card error">
-                <div class="stat-label">에러율</div>
+                <div class="stat-label">Error Rate</div>
                 <div class="stat-value" id="stat-error-rate">0.00%</div>
                 <div class="stat-description">last 60 seconds</div>
             </div>
 
             <div class="stat-card active">
-                <div class="stat-label">활성 트랜잭션</div>
+                <div class="stat-label">Active Transactions</div>
                 <div class="stat-value" id="stat-active">0</div>
-                <div class="stat-description">현재 진행중</div>
+                <div class="stat-description">in progress</div>
             </div>
 
             <div class="stat-card slow">
-                <div class="stat-label">느린 트랜잭션</div>
+                <div class="stat-label">Slow Transactions</div>
                 <div class="stat-value" id="stat-slow">0</div>
                 <div class="stat-description">last 60 seconds</div>
             </div>
@@ -507,59 +507,59 @@
             <!-- 2D Chart -->
             <div id="chart-2d" class="chart-view">
                 <div class="chart-header">
-                    <h2>실시간 액티브 서비스 모니터링 (2D)</h2>
+                    <h2>Real-time Active Service Monitoring (2D)</h2>
                     <div class="chart-legend">
                         <span class="legend-item">
                             <span class="legend-color" style="background-color: #10b981;"></span>
-                            정상
+                            Success
                         </span>
                         <span class="legend-item">
                             <span class="legend-color" style="background-color: #f59e0b;"></span>
-                            느림 (&gt;2s)
+                            Slow (&gt;2s)
                         </span>
                         <span class="legend-item">
                             <span class="legend-color" style="background-color: #ef4444;"></span>
-                            에러
+                            Error
                         </span>
                     </div>
                 </div>
                 <div id="canvas-2d-container">
                     <canvas id="canvas-2d"></canvas>
                 </div>
-                <div class="transaction-count" id="count-2d">총 0개 트랜잭션 (최근 60초)</div>
+                <div class="transaction-count" id="count-2d">Total 0 transactions (last 60s)</div>
             </div>
 
             <!-- 3D Chart -->
             <div id="chart-3d" class="chart-view active">
                 <div class="chart-header">
-                    <h2>실시간 액티브 서비스 모니터링 (3D)</h2>
+                    <h2>Real-time Active Service Monitoring (3D)</h2>
                     <div class="chart-legend">
                         <span class="legend-item">
                             <span class="legend-color" style="background-color: #10b981;"></span>
-                            정상
+                            Success
                         </span>
                         <span class="legend-item">
                             <span class="legend-color" style="background-color: #f59e0b;"></span>
-                            느림 (&gt;2s)
+                            Slow (&gt;2s)
                         </span>
                         <span class="legend-item">
                             <span class="legend-color" style="background-color: #ef4444;"></span>
-                            에러
+                            Error
                         </span>
                     </div>
                 </div>
                 <canvas id="canvas-3d"></canvas>
-                <div class="transaction-count" id="count-3d">총 0개 트랜잭션 (최근 60초)</div>
+                <div class="transaction-count" id="count-3d">Total 0 transactions (last 60s)</div>
             </div>
         </div>
 
         <!-- Transaction Table -->
         <div class="table-container">
             <div class="table-header">
-                <h2>📋 실시간 트랜잭션 로그</h2>
+                <h2>📋 Real-time Transaction Log</h2>
                 <div class="table-controls">
-                    <span class="table-info">최근 <span id="table-count">50</span>개 트랜잭션</span>
-                    <button class="refresh-button" onclick="updateTransactionTable()">🔄 새로고침</button>
+                    <span class="table-info">Latest <span id="table-count">50</span> transactions</span>
+                    <button class="refresh-button" onclick="updateTransactionTable()">🔄 Refresh</button>
                 </div>
             </div>
             <div class="table-wrapper">
@@ -567,11 +567,11 @@
                     <thead>
                         <tr>
                             <th>#</th>
-                            <th>시간</th>
-                            <th>서비스</th>
-                            <th>메서드</th>
-                            <th>응답시간</th>
-                            <th>상태</th>
+                            <th>Time</th>
+                            <th>Service</th>
+                            <th>Method</th>
+                            <th>Response Time</th>
+                            <th>Status</th>
                             <th>HTTP</th>
                         </tr>
                     </thead>
@@ -598,7 +598,7 @@
             constructor() {
                 this.transactionCounter = 0;
                 this.recentTransactions = [];
-                this.maxTransactions = 500; // 과부하 시나리오: 최대 트랜잭션 수 증가
+                this.maxTransactions = 100;
                 this.services = [
                     '/api/users',
                     '/api/orders',
@@ -619,18 +619,18 @@
                 const rand = Math.random();
                 let status, responseTime, httpStatus;
 
-                // 과부하 시나리오: 에러율 25%, 느림 40%, 정상 35%
-                if (rand < 0.25) {
+                // Normal traffic: 3% error, 7% slow, 90% success
+                if (rand < 0.03) {
                     status = 'error';
-                    responseTime = Math.floor(Math.random() * 5000) + 2000; // 2~7초
-                    httpStatus = [500, 502, 503, 504][Math.floor(Math.random() * 4)];
-                } else if (rand < 0.65) {
+                    responseTime = Math.floor(Math.random() * 2000) + 1000; // 1~3s
+                    httpStatus = [500, 503, 504][Math.floor(Math.random() * 3)];
+                } else if (rand < 0.10) {
                     status = 'slow';
-                    responseTime = Math.floor(Math.random() * 4000) + 2000; // 2~6초
+                    responseTime = Math.floor(Math.random() * 3000) + 2000; // 2~5s
                     httpStatus = 200;
                 } else {
                     status = 'success';
-                    responseTime = Math.floor(Math.random() * 1500) + 100; // 0.1~1.6초
+                    responseTime = Math.floor(Math.random() * 800) + 50; // 0.05~0.85s
                     httpStatus = 200;
                 }
 
@@ -870,8 +870,7 @@
         }
 
         function addParticle(transaction) {
-            // 과부하 시나리오: 최대 파티클 수 1000개로 증가
-            if (particlesData.length >= 1000) return;
+            if (particlesData.length >= 200) return;
 
             let color;
             switch (transaction.status) {
@@ -921,19 +920,19 @@
                 data: {
                     datasets: [
                         {
-                            label: '정상',
+                            label: 'Success',
                             data: [],
                             backgroundColor: '#10b981',
                             pointRadius: 6
                         },
                         {
-                            label: '느림',
+                            label: 'Slow',
                             data: [],
                             backgroundColor: '#f59e0b',
                             pointRadius: 6
                         },
                         {
-                            label: '에러',
+                            label: 'Error',
                             data: [],
                             backgroundColor: '#ef4444',
                             pointRadius: 6
@@ -949,15 +948,13 @@
                             position: 'bottom',
                             title: {
                                 display: true,
-                                text: '시간 (초 전)'
-                            },
-                            min: -60,
-                            max: 0
+                                text: 'Time (seconds ago)'
+                            }
                         },
                         y: {
                             title: {
                                 display: true,
-                                text: '응답 시간 (ms)'
+                                text: 'Response Time (ms)'
                             },
                             min: 0
                         }
@@ -969,7 +966,7 @@
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
-                                    return `응답시간: ${context.parsed.y}ms`;
+                                    return `Response Time: ${context.parsed.y}ms`;
                                 }
                             }
                         }
@@ -1002,10 +999,15 @@
             chart2D.data.datasets[0].data = successData;
             chart2D.data.datasets[1].data = slowData;
             chart2D.data.datasets[2].data = errorData;
+
+            // Update X-axis range dynamically
+            chart2D.options.scales.x.min = -60;
+            chart2D.options.scales.x.max = 0;
+
             chart2D.update('none');
 
             document.getElementById('count-2d').textContent =
-                `총 ${transactions.length}개 트랜잭션 (최근 60초)`;
+                `Total ${transactions.length} transactions (last 60s)`;
         }
 
         // ========================================
@@ -1014,7 +1016,7 @@
         function updateTransactionCount() {
             const transactions = dataGenerator.getRecentTransactions();
             document.getElementById('count-3d').textContent =
-                `총 ${transactions.length}개 트랜잭션 (최근 60초)`;
+                `Total ${transactions.length} transactions (last 60s)`;
         }
 
         // ========================================
@@ -1033,13 +1035,13 @@
             // 테이블 내용 생성
             tbody.innerHTML = recentTransactions.map((tx, index) => {
                 const time = new Date(tx.timestamp);
-                const timeStr = time.toLocaleTimeString('ko-KR');
+                const timeStr = time.toLocaleTimeString('en-US');
 
                 // 상태 배지
                 const statusBadge = `<span class="status-badge ${tx.status}">${
-                    tx.status === 'success' ? '정상' :
-                    tx.status === 'slow' ? '느림' :
-                    '에러'
+                    tx.status === 'success' ? 'Success' :
+                    tx.status === 'slow' ? 'Slow' :
+                    'Error'
                 }</span>`;
 
                 // 응답시간 색상
@@ -1071,8 +1073,8 @@
         // Main Loop
         // ========================================
         function generateTransactions() {
-            // 과부하 시나리오: 한 번에 5~20개의 트랜잭션 생성
-            const count = Math.floor(Math.random() * 16) + 5;
+            // Normal traffic: 1~3 transactions per batch
+            const count = Math.floor(Math.random() * 3) + 1;
             const newTransactions = dataGenerator.generateBatch(count);
 
             newTransactions.forEach(tx => {
@@ -1082,8 +1084,8 @@
                 }
             });
 
-            // 과부하 시나리오: 50~200ms 간격으로 빠르게 생성
-            const nextInterval = Math.random() * 150 + 50;
+            // Normal traffic: 500~2000ms interval
+            const nextInterval = Math.random() * 1500 + 500;
             setTimeout(generateTransactions, nextInterval);
         }
 
@@ -1097,15 +1099,15 @@
             // Initialize 2D
             init2D();
 
-            // Initial transactions - 과부하 시나리오: 100개로 시작
-            const initialTransactions = dataGenerator.generateBatch(100);
+            // Initial transactions
+            const initialTransactions = dataGenerator.generateBatch(20);
             initialTransactions.forEach(tx => {
                 dataGenerator.addTransaction(tx);
                 addParticle(tx);
             });
 
-            // Start generating transactions - 과부하 시나리오: 빠르게 시작
-            setTimeout(generateTransactions, 100);
+            // Start generating transactions
+            setTimeout(generateTransactions, 1000);
 
             // Update statistics every second
             setInterval(() => {
