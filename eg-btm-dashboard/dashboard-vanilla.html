@@ -239,8 +239,198 @@
         }
 
         .stat-card,
-        .chart-container {
+        .chart-container,
+        .table-container {
             animation: fadeIn 0.5s ease-out;
+        }
+
+        /* Transaction Table */
+        .table-container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .table-header h2 {
+            font-size: 1.5rem;
+            color: #1f2937;
+            font-weight: 600;
+        }
+
+        .table-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .table-info {
+            font-size: 0.9rem;
+            color: #6b7280;
+        }
+
+        .table-info span {
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .refresh-button {
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .refresh-button:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+
+        #transaction-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        #transaction-table thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        #transaction-table th {
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        #transaction-table tbody tr {
+            border-bottom: 1px solid #e5e7eb;
+            transition: background-color 0.2s;
+        }
+
+        #transaction-table tbody tr:hover {
+            background-color: #f9fafb;
+        }
+
+        #transaction-table tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        #transaction-table td {
+            padding: 12px 16px;
+            white-space: nowrap;
+        }
+
+        #transaction-table td:first-child {
+            color: #9ca3af;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-badge.success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-badge.slow {
+            background: #fed7aa;
+            color: #92400e;
+        }
+
+        .status-badge.error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .response-time {
+            font-weight: 600;
+            font-family: 'Courier New', monospace;
+        }
+
+        .response-time.fast {
+            color: #10b981;
+        }
+
+        .response-time.medium {
+            color: #f59e0b;
+        }
+
+        .response-time.slow {
+            color: #ef4444;
+        }
+
+        .http-status {
+            font-weight: 600;
+            font-family: 'Courier New', monospace;
+        }
+
+        .http-status.success {
+            color: #10b981;
+        }
+
+        .http-status.error {
+            color: #ef4444;
+        }
+
+        .method-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+        }
+
+        .method-badge.GET {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .method-badge.POST {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .method-badge.PUT {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .method-badge.DELETE {
+            background: #fee2e2;
+            color: #991b1b;
         }
 
         @media (max-width: 768px) {
@@ -360,6 +550,35 @@
                 </div>
                 <canvas id="canvas-3d"></canvas>
                 <div class="transaction-count" id="count-3d">총 0개 트랜잭션 (최근 60초)</div>
+            </div>
+        </div>
+
+        <!-- Transaction Table -->
+        <div class="table-container">
+            <div class="table-header">
+                <h2>📋 실시간 트랜잭션 로그</h2>
+                <div class="table-controls">
+                    <span class="table-info">최근 <span id="table-count">50</span>개 트랜잭션</span>
+                    <button class="refresh-button" onclick="updateTransactionTable()">🔄 새로고침</button>
+                </div>
+            </div>
+            <div class="table-wrapper">
+                <table id="transaction-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>시간</th>
+                            <th>서비스</th>
+                            <th>메서드</th>
+                            <th>응답시간</th>
+                            <th>상태</th>
+                            <th>HTTP</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transaction-table-body">
+                        <!-- Transactions will be inserted here -->
+                    </tbody>
+                </table>
             </div>
         </div>
 
@@ -799,6 +1018,56 @@
         }
 
         // ========================================
+        // Transaction Table Update
+        // ========================================
+        function updateTransactionTable() {
+            const transactions = dataGenerator.getRecentTransactions();
+            const tbody = document.getElementById('transaction-table-body');
+
+            // 최근 50개만 표시 (역순으로)
+            const recentTransactions = transactions.slice(-50).reverse();
+
+            // 테이블 카운트 업데이트
+            document.getElementById('table-count').textContent = recentTransactions.length;
+
+            // 테이블 내용 생성
+            tbody.innerHTML = recentTransactions.map((tx, index) => {
+                const time = new Date(tx.timestamp);
+                const timeStr = time.toLocaleTimeString('ko-KR');
+
+                // 상태 배지
+                const statusBadge = `<span class="status-badge ${tx.status}">${
+                    tx.status === 'success' ? '정상' :
+                    tx.status === 'slow' ? '느림' :
+                    '에러'
+                }</span>`;
+
+                // 응답시간 색상
+                let responseTimeClass = 'fast';
+                if (tx.responseTime >= 2000) {
+                    responseTimeClass = 'slow';
+                } else if (tx.responseTime >= 1000) {
+                    responseTimeClass = 'medium';
+                }
+
+                // HTTP 상태 색상
+                const httpStatusClass = tx.httpStatus >= 500 ? 'error' : 'success';
+
+                return `
+                    <tr>
+                        <td>${recentTransactions.length - index}</td>
+                        <td>${timeStr}</td>
+                        <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">${tx.service}</td>
+                        <td><span class="method-badge ${tx.method}">${tx.method}</span></td>
+                        <td><span class="response-time ${responseTimeClass}">${tx.responseTime}ms</span></td>
+                        <td>${statusBadge}</td>
+                        <td><span class="http-status ${httpStatusClass}">${tx.httpStatus}</span></td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // ========================================
         // Main Loop
         // ========================================
         function generateTransactions() {
@@ -846,10 +1115,12 @@
                 } else {
                     updateTransactionCount();
                 }
+                updateTransactionTable();
             }, 1000);
 
             // Initial update
             updateStatistics();
+            updateTransactionTable();
         });
     </script>
 </body>
