@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import ActiveTransactionChart from './ActiveTransactionChart';
+import ParticleFlowChart3D from './ParticleFlowChart3D';
 import StatisticsWidget from './StatisticsWidget';
 import { Transaction, TransactionStats } from '../types/transaction';
 import { dataGenerator } from '../services/dummyDataGenerator';
+
+type ChartType = '2d' | '3d';
 
 const Dashboard: React.FC = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -13,6 +16,7 @@ const Dashboard: React.FC = () => {
     activeTransactions: 0,
     slowTransactions: 0
   });
+  const [chartType, setChartType] = useState<ChartType>('3d');
 
   useEffect(() => {
     // 초기 트랜잭션 생성
@@ -60,7 +64,28 @@ const Dashboard: React.FC = () => {
 
       <StatisticsWidget stats={stats} />
 
-      <ActiveTransactionChart transactions={transactions} />
+      {/* Chart Type Toggle */}
+      <div className="chart-toggle-container">
+        <button
+          className={`toggle-button ${chartType === '2d' ? 'active' : ''}`}
+          onClick={() => setChartType('2d')}
+        >
+          📊 2D Chart
+        </button>
+        <button
+          className={`toggle-button ${chartType === '3d' ? 'active' : ''}`}
+          onClick={() => setChartType('3d')}
+        >
+          🎨 3D Particle Flow
+        </button>
+      </div>
+
+      {/* Conditional Chart Rendering */}
+      {chartType === '2d' ? (
+        <ActiveTransactionChart transactions={transactions} />
+      ) : (
+        <ParticleFlowChart3D transactions={transactions} />
+      )}
 
       <footer className="dashboard-footer">
         <p>
