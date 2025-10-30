@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>eG Enterprise BTM Dashboard</title>
+
+    <!-- React and ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+    <!-- Babel Standalone for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Recharts -->
+    <script src="https://unpkg.com/recharts@2.5.0/dist/Recharts.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+                'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            background: linear-gradient(to bottom, #f9fafb, #f3f4f6);
+            min-height: 100vh;
+        }
+
+        .dashboard {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .dashboard-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 30px 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .dashboard-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .dashboard-header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transition: transform 0.2s, box-shadow 0.2s;
+            border-left: 4px solid #667eea;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+        }
+
+        .stat-card.error {
+            border-left-color: #ef4444;
+        }
+
+        .stat-card.active {
+            border-left-color: #10b981;
+        }
+
+        .stat-card.slow {
+            border-left-color: #f59e0b;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #6b7280;
+            font-weight: 600;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 5px;
+        }
+
+        .stat-description {
+            font-size: 0.85rem;
+            color: #9ca3af;
+        }
+
+        .chart-container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .chart-header h2 {
+            font-size: 1.5rem;
+            color: #1f2937;
+            font-weight: 600;
+        }
+
+        .chart-legend {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            color: #6b7280;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+        }
+
+        .transaction-count {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        .dashboard-footer {
+            text-align: center;
+            padding: 20px;
+            color: #6b7280;
+            font-size: 0.9rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                padding: 15px;
+            }
+
+            .dashboard-header h1 {
+                font-size: 1.8rem;
+            }
+
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .stat-value {
+                font-size: 2rem;
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .stat-card,
+        .chart-container {
+            animation: fadeIn 0.5s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        const { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } = Recharts;
+
+        // Data Generator
+        class DummyDataGenerator {
+            constructor() {
+                this.transactionCounter = 0;
+                this.recentTransactions = [];
+                this.maxTransactions = 100;
+                this.services = [
+                    '/api/users',
+                    '/api/orders',
+                    '/api/products',
+                    '/api/checkout',
+                    '/api/payment',
+                    '/api/search',
+                    '/api/inventory',
+                    '/api/auth/login',
+                    '/api/cart',
+                    '/api/shipping'
+                ];
+                this.httpMethods = ['GET', 'POST', 'PUT', 'DELETE'];
+            }
+
+            generateTransaction() {
+                this.transactionCounter++;
+                const rand = Math.random();
+                let status, responseTime, httpStatus;
+
+                if (rand < 0.03) {
+                    status = 'error';
+                    responseTime = Math.floor(Math.random() * 2000) + 1000;
+                    httpStatus = [500, 503, 504][Math.floor(Math.random() * 3)];
+                } else if (rand < 0.10) {
+                    status = 'slow';
+                    responseTime = Math.floor(Math.random() * 3000) + 2000;
+                    httpStatus = 200;
+                } else {
+                    status = 'success';
+                    responseTime = Math.floor(Math.random() * 800) + 50;
+                    httpStatus = 200;
+                }
+
+                return {
+                    id: `tx-${this.transactionCounter}-${Date.now()}`,
+                    timestamp: Date.now(),
+                    service: this.services[Math.floor(Math.random() * this.services.length)],
+                    url: this.services[Math.floor(Math.random() * this.services.length)],
+                    responseTime,
+                    status,
+                    httpStatus,
+                    method: this.httpMethods[Math.floor(Math.random() * this.httpMethods.length)]
+                };
+            }
+
+            generateBatch(count) {
+                const transactions = [];
+                for (let i = 0; i < count; i++) {
+                    transactions.push(this.generateTransaction());
+                }
+                return transactions;
+            }
+
+            addTransaction(transaction) {
+                this.recentTransactions.push(transaction);
+                if (this.recentTransactions.length > this.maxTransactions) {
+                    this.recentTransactions = this.recentTransactions.slice(-this.maxTransactions);
+                }
+            }
+
+            calculateStats(transactions, timeWindow = 60000) {
+                const now = Date.now();
+                const recentTx = transactions.filter(tx => now - tx.timestamp < timeWindow);
+
+                if (recentTx.length === 0) {
+                    return {
+                        tps: 0,
+                        avgResponseTime: 0,
+                        errorRate: 0,
+                        activeTransactions: 0,
+                        slowTransactions: 0
+                    };
+                }
+
+                const timeWindowSeconds = timeWindow / 1000;
+                const tps = recentTx.length / timeWindowSeconds;
+                const totalResponseTime = recentTx.reduce((sum, tx) => sum + tx.responseTime, 0);
+                const avgResponseTime = totalResponseTime / recentTx.length;
+                const errorCount = recentTx.filter(tx => tx.status === 'error').length;
+                const errorRate = (errorCount / recentTx.length) * 100;
+                const activeTransactions = recentTx.filter(tx => now - tx.timestamp < 5000).length;
+                const slowTransactions = recentTx.filter(tx => tx.status === 'slow').length;
+
+                return {
+                    tps: parseFloat(tps.toFixed(2)),
+                    avgResponseTime: parseFloat(avgResponseTime.toFixed(0)),
+                    errorRate: parseFloat(errorRate.toFixed(2)),
+                    activeTransactions,
+                    slowTransactions
+                };
+            }
+
+            getBTMData() {
+                return {
+                    transactions: this.recentTransactions,
+                    stats: this.calculateStats(this.recentTransactions)
+                };
+            }
+
+            getRecentTransactions() {
+                return this.recentTransactions;
+            }
+        }
+
+        const dataGenerator = new DummyDataGenerator();
+
+        // Statistics Widget Component
+        function StatisticsWidget({ stats }) {
+            return (
+                <div className="stats-container">
+                    <div className="stat-card">
+                        <div className="stat-label">TPS</div>
+                        <div className="stat-value">{stats.tps.toFixed(2)}</div>
+                        <div className="stat-description">Transactions/sec</div>
+                    </div>
+
+                    <div className="stat-card">
+                        <div className="stat-label">평균 응답시간</div>
+                        <div className="stat-value">{stats.avgResponseTime}</div>
+                        <div className="stat-description">milliseconds</div>
+                    </div>
+
+                    <div className="stat-card error">
+                        <div className="stat-label">에러율</div>
+                        <div className="stat-value">{stats.errorRate.toFixed(2)}%</div>
+                        <div className="stat-description">last 60 seconds</div>
+                    </div>
+
+                    <div className="stat-card active">
+                        <div className="stat-label">활성 트랜잭션</div>
+                        <div className="stat-value">{stats.activeTransactions}</div>
+                        <div className="stat-description">현재 진행중</div>
+                    </div>
+
+                    <div className="stat-card slow">
+                        <div className="stat-label">느린 트랜잭션</div>
+                        <div className="stat-value">{stats.slowTransactions}</div>
+                        <div className="stat-description">last 60 seconds</div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Active Transaction Chart Component
+        function ActiveTransactionChart({ transactions }) {
+            const now = Date.now();
+            const recentTransactions = transactions.filter(tx => now - tx.timestamp < 60000);
+
+            const chartData = recentTransactions.map(tx => ({
+                x: tx.timestamp,
+                y: tx.responseTime,
+                status: tx.status,
+                service: tx.service,
+                id: tx.id,
+                method: tx.method,
+                httpStatus: tx.httpStatus
+            }));
+
+            const getColor = (status) => {
+                switch (status) {
+                    case 'success': return '#10b981';
+                    case 'slow': return '#f59e0b';
+                    case 'error': return '#ef4444';
+                    default: return '#6b7280';
+                }
+            };
+
+            const CustomTooltip = ({ active, payload }) => {
+                if (active && payload && payload.length) {
+                    const data = payload[0].payload;
+                    const time = new Date(data.x);
+                    return (
+                        <div style={{
+                            background: 'rgba(17, 24, 39, 0.95)',
+                            padding: '12px 16px',
+                            borderRadius: '8px',
+                            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
+                            border: '1px solid rgba(255, 255, 255, 0.1)',
+                            color: 'white'
+                        }}>
+                            <p style={{ fontWeight: 600, marginBottom: '8px', fontSize: '0.95rem' }}>
+                                {data.service}
+                            </p>
+                            <p style={{ color: '#d1d5db', fontSize: '0.85rem', margin: '4px 0' }}>
+                                Method: {data.method}
+                            </p>
+                            <p style={{ color: '#d1d5db', fontSize: '0.85rem', margin: '4px 0' }}>
+                                Response Time: {data.y}ms
+                            </p>
+                            <p style={{ color: '#d1d5db', fontSize: '0.85rem', margin: '4px 0' }}>
+                                Status: {data.httpStatus}
+                            </p>
+                            <p style={{ color: '#d1d5db', fontSize: '0.85rem', margin: '4px 0' }}>
+                                Time: {time.toLocaleTimeString()}
+                            </p>
+                        </div>
+                    );
+                }
+                return null;
+            };
+
+            const formatXAxis = (timestamp) => {
+                const date = new Date(timestamp);
+                return date.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            };
+
+            return (
+                <div className="chart-container">
+                    <div className="chart-header">
+                        <h2>실시간 액티브 서비스 모니터링</h2>
+                        <div className="chart-legend">
+                            <span className="legend-item">
+                                <span className="legend-color" style={{ backgroundColor: '#10b981' }}></span>
+                                정상
+                            </span>
+                            <span className="legend-item">
+                                <span className="legend-color" style={{ backgroundColor: '#f59e0b' }}></span>
+                                느림 (&gt;2s)
+                            </span>
+                            <span className="legend-item">
+                                <span className="legend-color" style={{ backgroundColor: '#ef4444' }}></span>
+                                에러
+                            </span>
+                        </div>
+                    </div>
+
+                    <ResponsiveContainer width="100%" height={400}>
+                        <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                            <XAxis
+                                type="number"
+                                dataKey="x"
+                                name="time"
+                                domain={[now - 60000, now]}
+                                tickFormatter={formatXAxis}
+                                stroke="#6b7280"
+                            />
+                            <YAxis
+                                type="number"
+                                dataKey="y"
+                                name="response time"
+                                unit="ms"
+                                stroke="#6b7280"
+                            />
+                            <Tooltip content={<CustomTooltip />} />
+                            <Scatter
+                                data={chartData}
+                                fill="#8884d8"
+                                isAnimationActive={true}
+                                animationDuration={300}
+                            >
+                                {chartData.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={getColor(entry.status)} />
+                                ))}
+                            </Scatter>
+                        </ScatterChart>
+                    </ResponsiveContainer>
+
+                    <div className="transaction-count">
+                        총 {recentTransactions.length}개 트랜잭션 (최근 60초)
+                    </div>
+                </div>
+            );
+        }
+
+        // Dashboard Component
+        function Dashboard() {
+            const [transactions, setTransactions] = useState([]);
+            const [stats, setStats] = useState({
+                tps: 0,
+                avgResponseTime: 0,
+                errorRate: 0,
+                activeTransactions: 0,
+                slowTransactions: 0
+            });
+
+            useEffect(() => {
+                // 초기 트랜잭션 생성
+                const initialTransactions = dataGenerator.generateBatch(20);
+                initialTransactions.forEach(tx => dataGenerator.addTransaction(tx));
+
+                // 실시간 트랜잭션 생성
+                const generateTransaction = () => {
+                    const count = Math.floor(Math.random() * 3) + 1;
+                    const newTransactions = dataGenerator.generateBatch(count);
+                    newTransactions.forEach(tx => dataGenerator.addTransaction(tx));
+
+                    const btmData = dataGenerator.getBTMData();
+                    setTransactions([...btmData.transactions]);
+                    setStats(btmData.stats);
+
+                    const nextInterval = Math.random() * 1500 + 500;
+                    setTimeout(generateTransaction, nextInterval);
+                };
+
+                const timeout = setTimeout(generateTransaction, 1000);
+
+                // 통계 업데이트
+                const statsInterval = setInterval(() => {
+                    const btmData = dataGenerator.getBTMData();
+                    setTransactions([...btmData.transactions]);
+                    setStats(btmData.stats);
+                }, 1000);
+
+                return () => {
+                    clearTimeout(timeout);
+                    clearInterval(statsInterval);
+                };
+            }, []);
+
+            return (
+                <div className="dashboard">
+                    <header className="dashboard-header">
+                        <h1>eG Enterprise BTM Dashboard</h1>
+                        <p className="subtitle">Tomcat Business Transaction Monitoring</p>
+                    </header>
+
+                    <StatisticsWidget stats={stats} />
+
+                    <ActiveTransactionChart transactions={transactions} />
+
+                    <footer className="dashboard-footer">
+                        <p>
+                            Powered by eG Enterprise REST API |
+                            Last Update: {new Date().toLocaleTimeString()}
+                        </p>
+                    </footer>
+                </div>
+            );
+        }
+
+        // Render App
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<Dashboard />);
+    </script>
+</body>
+</html>
